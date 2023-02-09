@@ -423,7 +423,7 @@ impl Client {
     // Private helper to generate post requests. Needs to be a bit more flexible than
     // get because it should support SSE eventually
     #[cfg(feature = "async")]
-    async fn post<B, R>(&self, endpoint: &str, body: B) -> Result<R>
+    async fn post<B, R>(&self, endpoint: &str, body: B, organization: String) -> Result<R>
     where
         B: serde::ser::Serialize,
         R: serde::de::DeserializeOwned,
@@ -431,6 +431,7 @@ impl Client {
         let mut response = self
             .async_client
             .post(endpoint)
+			.header("OpenAI-Organization", organization)
             .body(surf::Body::from_json(&body)?)
             .await?;
         match response.status() {
@@ -478,10 +479,11 @@ impl Client {
     pub async fn complete_prompt(
         &self,
         prompt: impl Into<api::CompletionArgs>,
+		organization: String,
     ) -> Result<api::Completion> {
         let args = prompt.into();
         Ok(self
-            .post(&format!("engines/{}/completions", args.engine), args)
+            .post(&format!("engines/{}/completions", args.engine), args, organization)
             .await?)
     }
 
