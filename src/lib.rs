@@ -447,7 +447,7 @@ impl Client {
     }
 
     #[cfg(feature = "sync")]
-    fn post_sync<B, R>(&self, endpoint: &str, body: B) -> Result<R>
+    fn post_sync<B, R>(&self, endpoint: &str, body: B, organization: String) -> Result<R>
     where
         B: serde::ser::Serialize,
         R: serde::de::DeserializeOwned,
@@ -455,6 +455,7 @@ impl Client {
         let response = self
             .sync_client
             .post(&format!("{}{}", self.base_url, endpoint))
+			.set("OpenAI-Organization", &organization)
             .send_json(
                 serde_json::to_value(body).expect("Bug: client couldn't serialize its own type"),
             );
@@ -495,9 +496,10 @@ impl Client {
     pub fn complete_prompt_sync(
         &self,
         prompt: impl Into<api::CompletionArgs>,
+		organization: String,
     ) -> Result<api::Completion> {
         let args = prompt.into();
-        self.post_sync(&format!("engines/{}/completions", args.engine), args)
+        self.post_sync(&format!("engines/{}/completions", args.engine), args, organization)
     }
 }
 
