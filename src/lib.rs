@@ -365,9 +365,9 @@ impl Client {
     where
         T: serde::de::DeserializeOwned,
     {
-        let response = dbg!(self
+        let response = self
             .sync_client
-            .get(&format!("{}{}", self.base_url, endpoint)))
+            .get(&format!("{}{}", self.base_url, endpoint))
         .call();
         if let 200 = response.status() {
             Ok(response
